@@ -1,61 +1,123 @@
+/* =======================
+   Global Dark Theme
+======================= */
 body {
-    background-color: #000;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #0d0d0d;
     color: #00ff00;
-    font-family: Consolas, monospace;
     margin: 0;
-    padding: 0;
+    padding: 20px;
 }
 
 .container {
-    width: 90%;
+    max-width: 1000px;
     margin: auto;
-    margin-top: 20px;
 }
 
+/* =======================
+   Panels
+======================= */
 .panel {
-    background: #0a0a0a;
-    border: 2px solid #00ff00;
+    background-color: #111;
+    border: 1px solid #00ff00;
+    border-radius: 6px;
     padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px #00ff0033;
 }
 
-h1, h2 {
+.panel h2 {
     color: #00ff00;
 }
 
-input, select, button {
+/* =======================
+   Inputs & Selects
+======================= */
+input[type="text"], input[type="password"], select {
     width: 100%;
     padding: 8px;
-    margin-top: 6px;
-    margin-bottom: 10px;
-    background: black;
+    margin: 5px 0 10px 0;
+    background-color: #111;
     color: #00ff00;
     border: 1px solid #00ff00;
-    border-radius: 5px;
+    border-radius: 4px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #111;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 button:hover {
-    background: #00ff00;
-    color: black;
+    background-color: #00ff00;
+    color: #111;
 }
 
+/* =======================
+   Logs & Tables
+======================= */
 .log-panel {
-    height: 300px;
-    overflow-y: scroll;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
-#packetTable {
+#logOutput {
+    background-color: #000;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    height: 180px;
+    overflow-y: auto;
+    border: 1px solid #0f0;
+    border-radius: 4px;
+}
+
+table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 12px;
+    color: #0f0;
+    background-color: #111;
 }
 
-#packetTable th, #packetTable td {
-    border: 1px solid #00ff00;
-    padding: 4px;
+th, td {
+    border: 1px solid #00ff0044;
+    padding: 5px;
+    text-align: left;
 }
 
-#packetTable th {
-    background: #003300;
+th {
+    background-color: #000;
+    color: #00ff00;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #111;
+}
+
+/* =======================
+   Scrollbar Style
+======================= */
+#logOutput::-webkit-scrollbar,
+.log-panel::-webkit-scrollbar,
+table::-webkit-scrollbar {
+    width: 8px;
+}
+
+#logOutput::-webkit-scrollbar-thumb,
+.log-panel::-webkit-scrollbar-thumb,
+table::-webkit-scrollbar-thumb {
+    background-color: #00ff00;
+    border-radius: 4px;
+}
+
+#logOutput::-webkit-scrollbar-track,
+.log-panel::-webkit-scrollbar-track,
+table::-webkit-scrollbar-track {
+    background-color: #000;
 }
