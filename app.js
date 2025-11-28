@@ -1,77 +1,75 @@
-// =====================================================
-//        WiFi NETWORK DEFINITIONS
-// =====================================================
-const networks = {
-    "MyHome_Open": { security: "open", macFilter: [], password: null },
-    "Secure-WiFi-PBL": { security: "wpa2", password: "S0n@Proj!2025", macFilter: ["AA:BB:CC:DD:EE:01"] },
-    "Guest-Sona": { security: "wpa2", password: "Guest@2025", macFilter: [] }
+// =====================
+// CONFIG
+// =====================
+const SERVER = "http://127.0.0.1:3000"; // local server for testing
+const AUTH = {
+    "x-auth-key": "PBL_SECRET_KEY_2025",
+    "Content-Type": "application/json"
 };
 
 let connectedSSID = null;
 let hotspotBlockedDevices = [];
-const blockedSites = ["piratedmovies.com", "hackertools.net", "illegalstuff.org", "adult-content.com"];
-const callLogs = [];
 let packetCounter = 0;
 
-// =====================================================
-//                LOGGING SYSTEM
-// =====================================================
+// =====================
+// LOGGING
+// =====================
 function addLog(text) {
     const logBox = document.getElementById("logOutput");
-    logBox.innerHTML += text + "\n";
+    if (!logBox) return console.error("logOutput not found");
+    logBox.innerHTML += text + "<br>";
     logBox.scrollTop = logBox.scrollHeight;
-
-    // ALSO send logs to UDP server
-    sendPacketToServer(text);
 }
 
-// =====================================================
-//        SEND PACKET TO NODE.JS → UDP → WIRESHARK
-// =====================================================
-function sendPacketToServer(info) {
-    fetch("http://192.168.1.102:3000", {  // <-- replace with your LAN IP
-        method: "POST",
-        body: info
-    }).catch(err => console.error("Fetch error:", err));
-}
-
-// =====================================================
-//         PACKET CAPTURE (Fake Wireshark)
-// =====================================================
-function addPacket(sourceMAC, dest, protocol, info) {
+// =====================
+// PACKET CAPTURE (Fake Wireshark)
+// =====================
+function addPacket(source, dest, protocol, info) {
     packetCounter++;
-    const tbody = document.getElementById("packetTable").querySelector("tbody");
+    const tbody = document.querySelector("#packetTable tbody");
     const row = document.createElement("tr");
     const time = new Date().toLocaleTimeString();
 
     row.innerHTML = `
         <td>${packetCounter}</td>
         <td>${time}</td>
-        <td>${sourceMAC}</td>
+        <td>${source}</td>
         <td>${dest}</td>
         <td>${protocol}</td>
         <td>${info}</td>
     `;
     tbody.appendChild(row);
-
     tbody.parentElement.scrollTop = tbody.parentElement.scrollHeight;
 
-    sendPacketToServer(`[${protocol}] ${sourceMAC} -> ${dest}: ${info}`);
+    // Send to server
+    fetch(`${SERVER}/packet`, {
+        method: "POST",
+        headers: AUTH,
+        body: JSON.stringify({ src: source, dst: dest, protocol, info })
+    });
 }
 
-// =====================================================
-//        WiFi CONNECTION SYSTEM
-// =====================================================
+// =====================
+// WIFI NETWORKS
+// =====================
+const networks = {
+    "MyHome_Open": { security: "open", password: null, macFilter: [] },
+    "Secure-WiFi-PBL": { security: "wpa2", password: "S0n@Proj!2025", macFilter: ["AA:BB:CC:DD:EE:01"] },
+    "Guest-Sona": { security: "wpa2", password: "Guest@2025", macFilter: [] }
+};
+
+// =====================
+// CONNECT WIFI
+// =====================
 function connectToWiFi(deviceName, mac, ssid, password) {
     const net = networks[ssid];
-
     if (!net) {
         addLog(`❌ Network ${ssid} not found`);
         return;
     }
 
-    if (net.macFilter.length > 0 && !net.macFilter.includes(mac)) {
-        addLog(`❌ MAC Blocked: ${mac} is NOT allowed on ${ssid}`);
+    if (net.macFilter.length && !net.macFilter.includes(mac)) {
+        addLog(`❌ MAC Blocked: ${mac}`);
         addPacket(mac, ssid, "WiFi", "MAC Blocked");
         return;
     }
@@ -95,50 +93,57 @@ function connectToWiFi(deviceName, mac, ssid, password) {
     }
 }
 
-// =====================================================
-//        WEBSITE ACCESS SYSTEM
-// =====================================================
+// =====================
+// WEBSITE ACCESS
+// =====================
 function checkWebsiteAccess(url) {
     const domain = url.replace("https://", "").replace("http://", "").split("/")[0];
 
-    if (blockedSites.includes(domain)) {
-        addLog(`⚠️ ACCESS BLOCKED: ${domain} contains harmful or illegal content.`);
-        addPacket("Browser", domain, "HTTP", "Blocked Site");
-    } else {
-        addLog(`🌐 Allowed: ${domain}`);
-        addPacket("Browser", domain, "HTTP", "Allowed Site");
-    }
+    fetch("firewallRules.json")
+        .then(r => r.json())
+        .then(rules => {
+            if (rules.blocked.includes(domain)) {
+                addLog(`⛔ BLOCKED by FIREWALL: ${domain}`);
+                addPacket("Browser", domain, "HTTP", "Firewall Blocked");
+
+                fetch(`${SERVER}/firewall/alert`, {
+                    method: "POST",
+                    headers: AUTH,
+                    body: JSON.stringify({ domain })
+                });
+            } else {
+                addLog(`🌐 Allowed: ${domain}`);
+                addPacket("Browser", domain, "HTTP", "Allowed Website");
+            }
+        });
 }
 
-// =====================================================
-//        HOTSPOT BLOCK SYSTEM
-// =====================================================
-function requestHotspot(deviceMAC) {
-    if (hotspotBlockedDevices.includes(deviceMAC)) {
-        addLog(`❌ Hotspot already disabled for device ${deviceMAC}`);
-        addPacket(deviceMAC, "Hotspot", "WiFi", "Hotspot Already Blocked");
+// =====================
+// HOTSPOT BLOCK
+// =====================
+function requestHotspot(mac) {
+    if (hotspotBlockedDevices.includes(mac)) {
+        addLog(`❌ Hotspot already disabled for device ${mac}`);
+        addPacket(mac, "Hotspot", "WiFi", "Hotspot Already Blocked");
         return;
     }
-    hotspotBlockedDevices.push(deviceMAC);
-    addLog(`⚠️ Hotspot Sharing Blocked for ${deviceMAC} (Security Policy)`);
-    addPacket(deviceMAC, "Hotspot", "WiFi", "Hotspot Blocked");
+    hotspotBlockedDevices.push(mac);
+    addLog(`⚠️ Hotspot Sharing Blocked for ${mac}`);
+    addPacket(mac, "Hotspot", "WiFi", "Hotspot Blocked");
 }
 
-// =====================================================
-//        WIFI CALLING SYSTEM
-// =====================================================
-function wifiCall(deviceMAC, numberDialed, ssid) {
+// =====================
+// WIFI CALL
+// =====================
+function wifiCall(mac, numberDialed) {
     const time = new Date().toLocaleTimeString();
-    const entry = { mac: deviceMAC, number: numberDialed, time: time, ssid: ssid };
-    callLogs.push(entry);
-
-    addLog(`📞 WiFi Call: ${numberDialed} from ${deviceMAC} on ${ssid} @ ${time}`);
-    addPacket(deviceMAC, numberDialed, "VoIP", `WiFi Call on ${ssid}`);
+    addLog(`📞 WiFi Call: ${numberDialed} from ${mac} on ${connectedSSID} @ ${time}`);
+    addPacket(mac, numberDialed, "VoIP", `WiFi Call on ${connectedSSID}`);
 }
 
-// =====================================================
-//        BUTTON EVENT LISTENERS
-// =====================================================
+// =====================
+// BUTTONS
+// =====================
 document.getElementById("connectBtn").onclick = () => {
     const device = document.getElementById("deviceSelect").value;
     const mac = document.getElementById("macInput").value.toUpperCase();
@@ -160,22 +165,32 @@ document.getElementById("btnHotspot").onclick = () => {
 document.getElementById("btnCall").onclick = () => {
     const mac = document.getElementById("macInput").value.toUpperCase();
     const number = document.getElementById("callNumber").value;
-    wifiCall(mac, number, connectedSSID);
+    wifiCall(mac, number);
 };
 
-// =====================================================
-//        EXPORT PCAP FUNCTION (TEXT VERSION)
-// =====================================================
+// Firewall add rule
+document.getElementById("addFwRule").onclick = () => {
+    const domain = document.getElementById("fwInput").value.trim();
+    if (!domain) return;
+
+    fetch(`${SERVER}/firewall/block`, {
+        method: "POST",
+        headers: AUTH,
+        body: JSON.stringify({ domain })
+    }).then(() => {
+        addLog(`🔥 Firewall Rule Added: Block ${domain}`);
+    });
+};
+
+// Export PCAP
 document.getElementById("exportPCAP").onclick = () => {
     const pcapData = [];
-    const rows = document.getElementById("packetTable").querySelectorAll("tbody tr");
-
+    const rows = document.querySelectorAll("#packetTable tbody tr");
     rows.forEach(r => {
         const cols = r.querySelectorAll("td");
         const line = `${cols[0].innerText}, ${cols[1].innerText}, ${cols[2].innerText}, ${cols[3].innerText}, ${cols[4].innerText}, ${cols[5].innerText}`;
         pcapData.push(line);
     });
-
     const blob = new Blob(pcapData, { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
