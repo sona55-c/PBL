@@ -35,27 +35,16 @@ input, select, button {
     border-radius: 5px;
 }
 
-button {
-    cursor: pointer;
-    font-weight: bold;
-}
-
 button:hover {
     background: #00ff00;
     color: black;
 }
 
 .log-panel {
-    height: 280px;
+    height: 300px;
     overflow-y: scroll;
 }
 
-#logOutput {
-    white-space: pre-line;
-    font-size: 15px;
-}
-
-/* Fake Wireshark Table */
 #packetTable {
     width: 100%;
     border-collapse: collapse;
@@ -65,9 +54,8 @@ button:hover {
 #packetTable th, #packetTable td {
     border: 1px solid #00ff00;
     padding: 4px;
-    text-align: left;
 }
 
 #packetTable th {
-    background: #002200;
+    background: #003300;
 }
