@@ -2,36 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Secure WiFi Simulator + Fake Wireshark</title>
+    <title>Secure WiFi Security Simulator + Fake Wireshark</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h1>🛡 Secure WiFi Security Simulator (Dark Cyber Theme)</h1>
+    <h1>🛡 Secure WiFi Security Simulator</h1>
 
     <!-- WiFi Connection Panel -->
     <div class="panel">
         <h2>🔌 Connect to WiFi</h2>
-        <label>Choose Device:</label>
+        <label>Device Name:</label>
         <select id="deviceSelect">
             <option value="User-Device">User-Device</option>
             <option value="Guest-Device">Guest-Device</option>
         </select>
 
-        <label>Enter Device MAC Address:</label>
+        <label>MAC Address:</label>
         <input type="text" id="macInput" placeholder="AA:BB:CC:DD:EE:01">
 
         <label>Select WiFi:</label>
         <select id="wifiSelect">
             <option value="MyHome_Open">MyHome_Open (Open)</option>
             <option value="Secure-WiFi-PBL">Secure-WiFi-PBL (Secure)</option>
+            <option value="Guest-Sona">Guest-Sona (Secure)</option>
         </select>
 
-        <label>Password (only for secure WiFi):</label>
-        <input type="password" id="wifiPassword" placeholder="Enter password">
+        <label>Password (for secure WiFi only):</label>
+        <input type="password" id="wifiPassword">
 
         <button id="connectBtn">Connect</button>
+    </div>
+
+    <!-- Firewall Panel -->
+    <div class="panel">
+        <h2>🔥 Firewall Control</h2>
+        <input type="text" id="fwInput" placeholder="Enter website (example: facebook.com)">
+        <button id="addFwRule">Add Block Rule</button>
     </div>
 
     <!-- Website Access Panel -->
@@ -50,7 +58,7 @@
     <!-- WiFi Calling Panel -->
     <div class="panel">
         <h2>📞 WiFi Calling Test</h2>
-        <input type="text" id="callNumber" placeholder="Enter phone number">
+        <input type="text" id="callNumber" placeholder="Phone number">
         <button id="btnCall">Make WiFi Call</button>
     </div>
 
@@ -61,7 +69,7 @@
         <button id="exportPCAP">💾 Export PCAP</button>
     </div>
 
-    <!-- Fake Wireshark Panel -->
+    <!-- Fake Wireshark -->
     <div class="panel log-panel">
         <h2>🖥 Fake Wireshark Packet Capture</h2>
         <table id="packetTable">
@@ -69,15 +77,13 @@
                 <tr>
                     <th>#</th>
                     <th>Time</th>
-                    <th>Source MAC</th>
+                    <th>Source</th>
                     <th>Destination</th>
                     <th>Protocol</th>
                     <th>Info</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Packets will appear here -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -86,4 +92,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-<!-- -->
