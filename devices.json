@@ -1,0 +1,5 @@
+[
+  { "ssid": "MyHome_Open", "macFilter": [] },
+  { "ssid": "Secure-WiFi-PBL", "macFilter": ["AA:BB:CC:DD:EE:01"] },
+  { "ssid": "Guest-Sona", "macFilter": [] }
+]

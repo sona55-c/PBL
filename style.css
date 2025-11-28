@@ -1,0 +1,73 @@
+body {
+    background-color: #000;
+    color: #00ff00;
+    font-family: Consolas, monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    margin: auto;
+    margin-top: 20px;
+}
+
+.panel {
+    background: #0a0a0a;
+    border: 2px solid #00ff00;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+h1, h2 {
+    color: #00ff00;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    background: black;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+    border-radius: 5px;
+}
+
+button {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #00ff00;
+    color: black;
+}
+
+.log-panel {
+    height: 280px;
+    overflow-y: scroll;
+}
+
+#logOutput {
+    white-space: pre-line;
+    font-size: 15px;
+}
+
+/* Fake Wireshark Table */
+#packetTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#packetTable th, #packetTable td {
+    border: 1px solid #00ff00;
+    padding: 4px;
+    text-align: left;
+}
+
+#packetTable th {
+    background: #002200;
+}
