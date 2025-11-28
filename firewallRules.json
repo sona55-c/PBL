@@ -1,3 +1,8 @@
 {
-    "blocked": []
+  "blocked": [
+    "hs",
+    "porn.com",
+    "piratedmovies.com",
+    "http://piratedmovies.com"
+  ]
 }
