@@ -3,7 +3,8 @@
 // =====================================================
 const networks = {
     "MyHome_Open": { security: "open", macFilter: [], password: null },
-    "Secure-WiFi-PBL": { security: "wpa2", password: "S0n@Proj!2025", macFilter: ["AA:BB:CC:DD:EE:01"] }
+    "Secure-WiFi-PBL": { security: "wpa2", password: "S0n@Proj!2025", macFilter: ["AA:BB:CC:DD:EE:01"] },
+    "Guest-Sona": { security: "wpa2", password: "Guest@2025", macFilter: [] }
 };
 
 let connectedSSID = null;
@@ -20,7 +21,7 @@ function addLog(text) {
     logBox.innerHTML += text + "\n";
     logBox.scrollTop = logBox.scrollHeight;
 
-    // ALSO send logs to Wireshark packet stream
+    // ALSO send logs to UDP server
     sendPacketToServer(text);
 }
 
@@ -28,16 +29,11 @@ function addLog(text) {
 //        SEND PACKET TO NODE.JS → UDP → WIRESHARK
 // =====================================================
 function sendPacketToServer(info) {
-    fetch("http://192.168.1.102", {  // <-- YOUR IPv4 here
+    fetch("http://192.168.1.102:3000", {  // <-- replace with your LAN IP
         method: "POST",
         body: info
     }).catch(err => console.error("Fetch error:", err));
 }
-
-
-
-
-
 
 // =====================================================
 //         PACKET CAPTURE (Fake Wireshark)
@@ -58,10 +54,8 @@ function addPacket(sourceMAC, dest, protocol, info) {
     `;
     tbody.appendChild(row);
 
-    // scroll fake wireshark panel
     tbody.parentElement.scrollTop = tbody.parentElement.scrollHeight;
 
-    // ALSO send real packet to Node/Wireshark
     sendPacketToServer(`[${protocol}] ${sourceMAC} -> ${dest}: ${info}`);
 }
 
